@@ -1,0 +1,40 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev openjdk-17-jdk aidl
+        pip install --upgrade buildozer "cython<3.0.0"
+
+    - name: Build APK with Buildozer
+      run: |
+        buildozer init
+        sed -i 's/title = My Application/title = AlDimashqi/g' buildozer.spec
+        sed -i 's/package.name = myapp/package.name = aldimashqi/g' buildozer.spec
+        sed -i 's/package.domain = org.test/package.domain = com.aldimashqi/g' buildozer.spec
+        sed -i 's/source.include_exts = py,png,jpg,kv,atlas/source.include_exts = py,png,jpg,kv,atlas,ttf,db/g' buildozer.spec
+        sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
+        echo y | buildozer -v android debug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: AlDimashqi-APK
+        path: bin/*.apk
