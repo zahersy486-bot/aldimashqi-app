@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    timeout-minutes: 60
 
     steps:
     - uses: actions/checkout@v4
@@ -17,7 +18,7 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Dependencies & Android Tools
+    - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev openjdk-17-jdk unzip tar wget
@@ -34,6 +35,7 @@ jobs:
         sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/g' buildozer.spec
         sed -i 's/# android.api = 31/android.api = 33/g' buildozer.spec
         sed -i 's/# android.minapi = 21/android.minapi = 24/g' buildozer.spec
+        sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
         yes | buildozer -v android debug
 
     - name: Upload APK Artifact
