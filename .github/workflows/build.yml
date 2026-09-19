@@ -17,7 +17,7 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: kivy/buildozer:latest
-        options: -v ${{ github.workspace }}:/home/user/hostroot
+        options: -v ${{ github.workspace }}:/home/user/hostroot -w /home/user/hostroot
         run: |
           buildozer init
           sed -i 's/title = My Application/title = AlDimashqi/g' buildozer.spec
@@ -29,7 +29,7 @@ jobs:
           sed -i 's/# android.minapi = 21/android.minapi = 24/g' buildozer.spec
           sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
           
-          buildozer -v android debug
+          yes y | buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
