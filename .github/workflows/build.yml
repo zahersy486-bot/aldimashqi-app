@@ -24,7 +24,17 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Install System Dependencies
+    - name: Cache Buildozer & Android SDK
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.buildozer
+          .buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
+    - name: Install Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev unzip tar wget
@@ -42,7 +52,12 @@ jobs:
         sed -i 's/# android.api = 31/android.api = 33/g' buildozer.spec
         sed -i 's/# android.minapi = 21/android.minapi = 24/g' buildozer.spec
         sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
+        
+        # تخطي تراخيص الأندرويد فوراً وبدون انتظار
         export BUILDOZER_ACCEPT_SDK_LICENSES=1
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        
         yes | buildozer -v android debug
 
     - name: Upload APK Artifact
