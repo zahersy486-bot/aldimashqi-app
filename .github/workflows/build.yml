@@ -24,22 +24,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Android SDK & Accept All Licenses Automatically
-      uses: android-actions/setup-android@v3
-
     - name: Install System Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential git ccache libffi-dev libssl-dev unzip tar wget
         pip install --upgrade pip
         pip install --upgrade buildozer "cython<3.0.0"
-
-    - name: Pre-accept SDK Licenses
-      run: |
-        mkdir -p ~/.android
-        touch ~/.android/repositories.cfg
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-        yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses || true
 
     - name: Build APK with Buildozer
       run: |
@@ -52,10 +42,10 @@ jobs:
         sed -i 's/# android.api = 31/android.api = 33/g' buildozer.spec
         sed -i 's/# android.minapi = 21/android.minapi = 24/g' buildozer.spec
         sed -i 's/android.archs = arm64-v8a, armeabi-v7a/android.archs = arm64-v8a/g' buildozer.spec
-        sed -i 's/# android.sdk_path =/android.sdk_path = '\''\/usr\/local\/lib\/android\/sdk'\''/g' buildozer.spec
         
+        # التغلب على شاشة التراخيص والموافقة تلقائياً
         export BUILDOZER_ACCEPT_SDK_LICENSES=1
-        yes | buildozer -v android debug
+        yes | buildozer -v android debug || yes | buildozer -v android debug
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
